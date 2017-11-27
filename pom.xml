@@ -16,8 +16,8 @@
     </build>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.seddevproject.wsWrapper</groupId>
-    <artifactId>wsWrapper</artifactId>
+    <groupId>uk.ac.gla.seddev.clientlib</groupId>
+    <artifactId>SED-ClientLib</artifactId>
     <version>1.0-SNAPSHOT</version>
     <dependencies>
         <dependency>
