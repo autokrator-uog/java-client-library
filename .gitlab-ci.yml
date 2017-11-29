@@ -24,4 +24,5 @@ publish:
   image: debian:jessie
   script:
     - echo "Uh oh it's not done yet..."
-    - exit 1
+  only:
+    - master
