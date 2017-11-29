@@ -18,6 +18,7 @@ public class wsWrapper {
     private MessageHandler messageHandler;
     private static final Logger LOG = Logger.getLogger(wsWrapper.class.getName());
 
+
     public wsWrapper(URI endpointURI) {
         try {
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
@@ -95,9 +96,7 @@ public class wsWrapper {
         }
     }
 
-    public static interface MessageHandler {
-
-        public void handleMessage(String message);
+    public interface MessageHandler {
+        void handleMessage(String message);
     }
-
 }

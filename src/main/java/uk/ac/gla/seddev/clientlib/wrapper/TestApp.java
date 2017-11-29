@@ -27,12 +27,11 @@ public class TestApp {
             Data d = new Data();
             Event e = new Event("deposit", d);
             events.add(e);
-                    Message message = new New("new", events);
-                    String out = gson.toJson(message);
-                    System.out.println(out);
-                    clientEndPoint.sendMessage(out);
-                    Thread.sleep(5000);
-            Thread.sleep(5000);
+            Message message = new New("new", events);
+            String out = gson.toJson(message);
+            System.out.println(out);
+            clientEndPoint.sendMessage(out);
+            Thread.sleep(50000);
 
         } catch (InterruptedException ex) {
             System.err.println("InterruptedException exception: " + ex.getMessage());
