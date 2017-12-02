@@ -6,7 +6,7 @@
 
     <groupId>uk.ac.gla.sed.shared</groupId>
     <artifactId>eventbusclient</artifactId>
-    <version>0.3.2</version>
+    <version>1.0-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -41,10 +41,6 @@
                             </excludes>
                         </filter>
                     </filters>
-
-                    <!-- MOVE ORIGINAL AWAY -->
-                    <outputDirectory>${project.basedir}/target/jar_without_deps</outputDirectory>
-                    <shadedArtifactAttached>false</shadedArtifactAttached>
                 </configuration>
                 <executions>
                     <execution>
