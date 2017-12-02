@@ -2,20 +2,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>uk.ac.gla.sed.shared</groupId>
+    <artifactId>eventbusclient</artifactId>
+    <version>0.3.2</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-
-        <!-- You'll probably want to remove this for your project. We're just using it here
-             so that dropwizard-example doesn't get deployed as a library. -->
-        <maven.deploy.skip>true</maven.deploy.skip>
-        <!-- You'll probably want to remove this for your project. We'Re just using it here
-             so that dropwizard-example site doesn't get staged and deployed. -->
-        <maven.site.skip>true</maven.site.skip>
-        <maven.site.deploy.skip>true</maven.site.deploy.skip>
 
         <tyrus.version>1.13.1</tyrus.version>
     </properties>
@@ -27,7 +24,7 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>2.3</version>
                 <configuration>
-                    <createDependencyReducedPom>true</createDependencyReducedPom>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
                     <filters>
                         <filter>
                             <artifact>*:*</artifact>
@@ -44,6 +41,10 @@
                             </excludes>
                         </filter>
                     </filters>
+
+                    <!-- MOVE ORIGINAL AWAY -->
+                    <outputDirectory>${project.basedir}/target/jar_without_deps</outputDirectory>
+                    <shadedArtifactAttached>false</shadedArtifactAttached>
                 </configuration>
                 <executions>
                     <execution>
@@ -56,27 +57,12 @@
             </plugin>
         </plugins>
     </build>
-    <modelVersion>4.0.0</modelVersion>
-
-    <groupId>uk.ac.gla.sed.shared</groupId>
-    <artifactId>eventbusclient</artifactId>
-    <version>1.0-SNAPSHOT</version>
     <dependencies>
-        <dependency>
-            <groupId>javax.websocket</groupId>
-            <artifactId>javax.websocket-client-api</artifactId>
-            <version>1.0</version>
-        </dependency>
         <dependency>
             <groupId>org.glassfish.tyrus</groupId>
             <artifactId>tyrus-client</artifactId>
             <version>${tyrus.version}</version>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>org.glassfish.tyrus</groupId>-->
-        <!--<artifactId>tyrus-container-grizzly</artifactId>-->
-        <!--<version>${tyrus.version}</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.glassfish.tyrus</groupId>
             <artifactId>tyrus-server</artifactId>
@@ -87,11 +73,13 @@
             <artifactId>tyrus-container-grizzly-server</artifactId>
             <version>${tyrus.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.json</artifactId>
-            <version>1.0.1</version>
-        </dependency>
+        <!-- Already defined with tyrus-server -->
+
+        <!--<dependency>-->
+        <!--<groupId>javax.websocket</groupId>-->
+        <!--<artifactId>javax.websocket-client-api</artifactId>-->
+        <!--<version>1.0</version>-->
+        <!--</dependency>-->
 
         <!-- MINIMAL-JSON LIBRARY -->
         <dependency>

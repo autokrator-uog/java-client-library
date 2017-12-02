@@ -1,8 +1,11 @@
 
+variables:
+  VERSION: 1.0.$CI_PIPELINE_ID
+
 stages:
   - test
   - build
-  - publish
+  - release
 
 test:
   stage: test
@@ -14,15 +17,8 @@ build:
   stage: build
   image: maven:3-jdk-8
   script:
-    - mvn package
+    - mvn versions:set -DnewVersion=$VERSION
+    - mvn clean package
   artifacts:
     paths:
       - target/*.jar
-
-publish:
-  stage: publish
-  image: debian:jessie
-  script:
-    - echo "Uh oh it's not done yet..."
-  only:
-    - master
