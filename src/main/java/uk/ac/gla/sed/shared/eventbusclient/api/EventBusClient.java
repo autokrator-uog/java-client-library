@@ -3,6 +3,8 @@ package uk.ac.gla.sed.shared.eventbusclient.api;
 import uk.ac.gla.sed.shared.eventbusclient.internal.messages.Message;
 import uk.ac.gla.sed.shared.eventbusclient.internal.messages.NewEventMessage;
 import uk.ac.gla.sed.shared.eventbusclient.internal.messages.ReceivedEventMessage;
+import uk.ac.gla.sed.shared.eventbusclient.internal.websockets.CloseHandler;
+import uk.ac.gla.sed.shared.eventbusclient.internal.websockets.MessageHandler;
 import uk.ac.gla.sed.shared.eventbusclient.internal.websockets.wsWrapper;
 
 import javax.websocket.CloseReason;
@@ -12,7 +14,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
 
-public class EventBusClient implements wsWrapper.MessageHandler, wsWrapper.CloseHandler {
+public class EventBusClient implements MessageHandler, CloseHandler {
     private static final Logger LOG = Logger.getLogger(EventBusClient.class.getName());
     private String eventBusURI;
     private wsWrapper wsWrapper;
@@ -21,21 +23,28 @@ public class EventBusClient implements wsWrapper.MessageHandler, wsWrapper.Close
     private ProducerThread producerThread;
 
     public EventBusClient(String eventBusURI) throws RuntimeException {
-        this.eventBusURI = eventBusURI;
-        this.wsWrapper = new wsWrapper(URI.create(eventBusURI));
+        this(new wsWrapper(URI.create(eventBusURI)));
+    }
+
+    public EventBusClient(wsWrapper wrapper) {
+        this.wsWrapper = wrapper;
+        this.eventBusURI = wrapper.getConnectionURI().toString();
 
         this.producerThread = new ProducerThread();
     }
 
     public void start() {
+        this.wsWrapper.openSession();
+
         this.producerThread.start();
-        this.wsWrapper.addMessageHandler(this);
-        this.wsWrapper.addCloseHandler(this);
+        this.wsWrapper.setMessageHandler(this);
+        this.wsWrapper.setCloseHandler(this);
     }
 
     public void stop() {
         this.producerThread.interrupt();
-        this.wsWrapper.removeMessageHandler();
+        this.wsWrapper.setMessageHandler(null);
+
         this.wsWrapper.closeSession();
     }
 
@@ -63,12 +72,12 @@ public class EventBusClient implements wsWrapper.MessageHandler, wsWrapper.Close
 
     @Override
     public void handleClose(CloseReason reason) {
-//        stop();
-//
-//        this.wsWrapper = new wsWrapper(URI.create(eventBusURI));
-//        this.producerThread = new ProducerThread();
-//
-//        start();
+        stop();
+
+        this.wsWrapper = new wsWrapper(URI.create(eventBusURI));
+        this.producerThread = new ProducerThread();
+
+        start();
     }
 
     public BlockingQueue<Event> getIncomingEventsQueue() {

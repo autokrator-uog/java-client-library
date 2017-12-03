@@ -5,11 +5,11 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 
 public class Event {
+    public static String EVENT_TYPE_FIELD = "event_type";
+    public static String EVENT_DATA_FIELD = "data";
+
     protected String type;
     protected JsonObject data;
-
-    public Event() {
-    }
 
     public Event(String type, JsonObject data) {
         this.type = type;
@@ -26,16 +26,16 @@ public class Event {
         JsonObject eventJsonObject = json.asObject();
 
         // extract the event_type and ensure it's a string
-        if (!eventJsonObject.get("event_type").isString()) {
+        if (!eventJsonObject.get(EVENT_TYPE_FIELD).isString()) {
             throw new RuntimeException("Event is not valid JSON - 'event_type' should be a string!");
         }
-        this.type = eventJsonObject.get("event_type").asString();
+        this.type = eventJsonObject.get(EVENT_TYPE_FIELD).asString();
 
         // extract data and ensure it's a JSON object
-        if (!eventJsonObject.get("data").isObject()) {
+        if (!eventJsonObject.get(EVENT_DATA_FIELD).isObject()) {
             throw new RuntimeException("Event is not valid JSON - 'data' should be a JSON Object!");
         }
-        this.data = eventJsonObject.get("data").asObject();
+        this.data = eventJsonObject.get(EVENT_DATA_FIELD).asObject();
     }
 
     @Override

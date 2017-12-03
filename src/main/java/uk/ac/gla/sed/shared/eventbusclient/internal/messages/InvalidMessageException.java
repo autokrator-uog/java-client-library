@@ -1,4 +1,4 @@
-package uk.ac.gla.sed.shared.eventbusclient.internal.exceptions;
+package uk.ac.gla.sed.shared.eventbusclient.internal.messages;
 
 public class InvalidMessageException extends RuntimeException {
     public InvalidMessageException(String message) {

@@ -8,9 +8,11 @@ import java.util.List;
 
 public class NewEventMessage extends Message {
     public NewEventMessage(List<Event> events) {
-        this.type = MessageType.NEW;
+        super(MessageType.NEW, Json.object());
 
-        messageJsonObject = Json.object();
+        if (events.isEmpty()) {
+            throw new InvalidMessageException("The list of events must not be empty!");
+        }
 
         JsonArray eventsJsonArray = Json.array().asArray();
         for (Event event : events) {

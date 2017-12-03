@@ -3,7 +3,6 @@ package uk.ac.gla.sed.shared.eventbusclient.internal.messages;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import uk.ac.gla.sed.shared.eventbusclient.api.Event;
-import uk.ac.gla.sed.shared.eventbusclient.internal.exceptions.InvalidMessageException;
 
 public class ReceivedEventMessage extends Message {
     private Event receivedEvent;
@@ -11,7 +10,7 @@ public class ReceivedEventMessage extends Message {
     public ReceivedEventMessage(String jsonSerialized) throws InvalidMessageException {
         super(jsonSerialized);
 
-        if (!messageJsonObject.getString(MessageType.MESSAGE_FIELD_NAME, "").equals(MessageType.EVENT.toString())) {
+        if (this.type != MessageType.EVENT) {
             throw new InvalidMessageException("Message is not of correct type.");
         }
 

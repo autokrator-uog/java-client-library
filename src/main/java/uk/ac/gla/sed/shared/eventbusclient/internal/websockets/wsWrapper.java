@@ -3,6 +3,7 @@ package uk.ac.gla.sed.shared.eventbusclient.internal.websockets;
 
 import org.glassfish.tyrus.client.ClientManager;
 import org.glassfish.tyrus.client.ClientProperties;
+import uk.ac.gla.sed.shared.eventbusclient.internal.messages.InvalidMessageException;
 import uk.ac.gla.sed.shared.eventbusclient.internal.messages.Message;
 
 import javax.websocket.*;
@@ -12,25 +13,32 @@ import java.util.logging.Logger;
 
 @ClientEndpoint
 public class wsWrapper {
+    private static final Logger LOG = Logger.getLogger(wsWrapper.class.getName());
     /**
      * Logger LOG is using level FINE for debug level logs. This is in line with common practice when using
      * java.util.logging.Logger
      */
 
-    private Session userSession = null;
+    private URI connectionURI;
+    private ClientManager client;
+    private ClientManager.ReconnectHandler reconnectHandler;
+
+    private Session userSession;
     private MessageHandler messageHandler;
     private CloseHandler closeHandler;
-    private static final Logger LOG = Logger.getLogger(wsWrapper.class.getName());
 
     public wsWrapper(URI endpointURI) {
-        ClientManager client = ClientManager.createClient();
-        client.getProperties().put(ClientProperties.RECONNECT_HANDLER, new wsReconnectHandler());
+        connectionURI = endpointURI;
+        reconnectHandler = new wsReconnectHandler();
+    }
 
-        try {
-            client.connectToServer(this, endpointURI);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public wsWrapper(URI endpointURI, ClientManager.ReconnectHandler reconnectHandler) {
+        connectionURI = endpointURI;
+        this.reconnectHandler = reconnectHandler;
+    }
+
+    public URI getConnectionURI() {
+        return connectionURI;
     }
 
     /**
@@ -59,10 +67,6 @@ public class wsWrapper {
         }
     }
 
-    public void closeSession() {
-        this.userSession = null;
-    }
-
     /**
      * Callback hook for Message Events. This method will be invoked when a client send a message.
      *
@@ -70,10 +74,16 @@ public class wsWrapper {
      */
     @OnMessage
     public void onMessage(String jsonMessage) {
-        if (this.messageHandler != null) {
-            // TODO exception handling
+        if (this.messageHandler == null) {
+            LOG.warning("No MessageHandler configured...ignoring message!");
+            return;
+        }
+
+        try {
             Message messageObj = new Message(jsonMessage);
             this.messageHandler.handleMessage(messageObj);
+        } catch (InvalidMessageException e) {
+            LOG.severe(String.format("Invalid message received! Contents: %s", jsonMessage));
         }
     }
 
@@ -81,81 +91,70 @@ public class wsWrapper {
     public void onError(Session session, Throwable throwable) {
         if (throwable != null) {
             throwable.printStackTrace();
-            LOG.severe("SYNC Client error: " + throwable.getMessage());
+            LOG.severe("Websocket error: " + throwable.getMessage());
         } else {
-            LOG.severe("SYNC Client error: unknown error");
+            LOG.severe("Websocket error: unknown");
         }
-
-    }
-
-    public void removeMessageHandler() {
-        this.messageHandler = null;
-    }
-
-    public void addMessageHandler(MessageHandler msgHandler) {
-        this.messageHandler = msgHandler;
     }
 
     public void sendMessage(Message message) {
+        String msgText = message.toString();
+
         try {
-            String msgText = message.toString();
             this.userSession.getBasicRemote().sendText(msgText);
         } catch (IOException error) {
             LOG.severe(error.getMessage());
         }
     }
 
-    public void addCloseHandler(CloseHandler closeHandler) {
+    public void openSession() {
+        client = ClientManager.createClient();
+        client.getProperties().put(ClientProperties.RECONNECT_HANDLER, reconnectHandler);
+
+        try {
+            client.connectToServer(this, connectionURI);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void closeSession() {
+        if (this.userSession != null) {
+            try {
+                this.userSession.close();
+            } catch (IOException e) {
+                LOG.severe(e.getMessage());
+            }
+        }
+    }
+
+    public ClientManager getClient() {
+        return client;
+    }
+
+    public Session getUserSession() {
+        return userSession;
+    }
+
+    /* THESE DEFINITELY SHOULD NOT BE PUBLIC, BUT IT'S THE ONLY WAY TO TEST THEM */
+
+    public MessageHandler getMessageHandler() {
+        return messageHandler;
+    }
+
+    public void setMessageHandler(MessageHandler msgHandler) {
+        this.messageHandler = msgHandler;
+    }
+
+    public CloseHandler getCloseHandler() {
+        return closeHandler;
+    }
+
+    public void setCloseHandler(CloseHandler closeHandler) {
         this.closeHandler = closeHandler;
     }
 
-    public interface MessageHandler {
-        void handleMessage(Message message);
+    public ClientManager.ReconnectHandler getReconnectHandler() {
+        return reconnectHandler;
     }
-
-    public interface CloseHandler {
-        void handleClose(CloseReason reason);
-    }
-
-    class wsReconnectHandler extends ClientManager.ReconnectHandler {
-        private static final int RESET_COUNT = 15;
-        private int counter = 0;
-
-        @Override
-        public boolean onDisconnect(CloseReason closeReason) {
-            counter++;
-            if (counter <= RESET_COUNT) {
-                LOG.severe("### Reconnecting... (reconnect count: " + counter + ")");
-                return true;
-            } else {
-                counter = 0;
-                return false;
-            }
-        }
-
-        @Override
-        public boolean onConnectFailure(Exception exception) {
-            counter++;
-            if (counter <= RESET_COUNT) {
-                LOG.severe("### Reconnecting... (reconnect count: " + counter + ") " + exception.getMessage());
-
-                try {
-                    Thread.sleep(300);
-                } catch (InterruptedException ex) {
-                    LOG.severe("onConnectFailure handler was interrupted!");
-                    return false;
-                }
-                return true;
-            } else {
-                counter = 0;
-                return false;
-            }
-        }
-
-        @Override
-        public long getDelay() {
-            return 1;
-        }
-    }
-
 }
