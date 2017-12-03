@@ -7,7 +7,7 @@ import uk.ac.gla.sed.shared.eventbusclient.api.EventBusClient;
 
 import java.util.Date;
 
-public class TestProduce {
+class TestProduce {
 
     public static void main(String[] args) throws Exception {
 

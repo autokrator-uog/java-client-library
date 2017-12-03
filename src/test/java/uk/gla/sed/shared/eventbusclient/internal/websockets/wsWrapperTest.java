@@ -23,10 +23,10 @@ import java.net.URI;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class wsWrapperTest {
-    private static URI uri = URI.create("ws://127.0.0.1");
-    private static CloseReason testCloseReason = new CloseReason(CloseReason.CloseCodes.GOING_AWAY, "We are testing...");
-    private static Message testMessage = new Message(MessageType.EVENT, Json.object().asObject().set("Test", "Test"));
+class wsWrapperTest {
+    private static final URI uri = URI.create("ws://127.0.0.1");
+    private static final CloseReason testCloseReason = new CloseReason(CloseReason.CloseCodes.GOING_AWAY, "We are testing...");
+    private static final Message testMessage = new Message(MessageType.EVENT, Json.object().asObject().set("Test", "Test"));
     private wsWrapper wrapperUnderTest;
     private StubReconnectHandler reconnectHandler;
     private Session wsSession;
@@ -73,9 +73,7 @@ public class wsWrapperTest {
 
     @Test
     void testOpenSessionMethodCall() {
-        assertThrows(RuntimeException.class, () -> {
-            wrapperUnderTest.openSession();
-        });
+        assertThrows(RuntimeException.class, () -> wrapperUnderTest.openSession());
 
         // client should be defined
         assertNotNull(wrapperUnderTest.getClient());
@@ -95,8 +93,6 @@ public class wsWrapperTest {
         wrapperUnderTest.onOpen(wsSession);
         assertSame(wsSession, wrapperUnderTest.getUserSession());
     }
-
-    ;
 
     @Test
     void testOnCloseWithoutCloseHandler() {

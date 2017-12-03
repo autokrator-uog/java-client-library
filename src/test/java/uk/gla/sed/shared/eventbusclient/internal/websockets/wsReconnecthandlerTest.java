@@ -9,8 +9,8 @@ import javax.websocket.CloseReason;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
-public class wsReconnecthandlerTest {
-    private static int RESET_COUNT = 3;
+class wsReconnecthandlerTest {
+    private static final int RESET_COUNT = 3;
 
     private wsReconnectHandler handler;
 

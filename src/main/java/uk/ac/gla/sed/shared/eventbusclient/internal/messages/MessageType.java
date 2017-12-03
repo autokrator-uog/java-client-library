@@ -8,7 +8,7 @@ public enum MessageType {
     REGISTER("register");
 
     public static final String MESSAGE_FIELD_NAME = "message_type";
-    private String text;
+    private final String text;
 
     MessageType(String text) {
         this.text = text;

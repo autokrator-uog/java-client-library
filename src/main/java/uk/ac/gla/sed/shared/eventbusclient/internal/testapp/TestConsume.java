@@ -5,7 +5,7 @@ import uk.ac.gla.sed.shared.eventbusclient.api.EventBusClient;
 
 import java.util.concurrent.TimeUnit;
 
-public class TestConsume {
+class TestConsume {
 
     public static void main(String[] args) {
         EventBusClient client = new EventBusClient("ws://127.0.0.1:8081");

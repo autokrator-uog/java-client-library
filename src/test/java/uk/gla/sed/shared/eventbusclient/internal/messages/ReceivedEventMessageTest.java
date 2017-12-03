@@ -11,11 +11,11 @@ import uk.ac.gla.sed.shared.eventbusclient.internal.messages.ReceivedEventMessag
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ReceivedEventMessageTest {
-    private static String testEventType = "TestEventType";
-    private static JsonObject testEventData = Json.object().asObject().set("TestField", "TestValue");
+class ReceivedEventMessageTest {
+    private static final String testEventType = "TestEventType";
+    private static final JsonObject testEventData = Json.object().asObject().set("TestField", "TestValue");
 
-    private static JsonObject exampleMessageJson = Json.object().asObject()
+    private static final JsonObject exampleMessageJson = Json.object().asObject()
             .set(MessageType.MESSAGE_FIELD_NAME, MessageType.EVENT.toString())
             .set(Event.EVENT_TYPE_FIELD, testEventType)
             .set(Event.EVENT_DATA_FIELD, testEventData);

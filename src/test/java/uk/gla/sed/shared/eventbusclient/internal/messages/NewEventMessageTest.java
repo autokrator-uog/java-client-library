@@ -15,8 +15,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class NewEventMessageTest {
-    private static JsonObject testEventBody = Json.object().asObject()
+class NewEventMessageTest {
+    private static final JsonObject testEventBody = Json.object().asObject()
             .set("Test", "test");
 
     private List<Event> eventList;

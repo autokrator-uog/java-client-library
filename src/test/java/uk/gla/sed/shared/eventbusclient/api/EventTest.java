@@ -8,11 +8,11 @@ import uk.ac.gla.sed.shared.eventbusclient.api.Event;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class EventTest {
-    private String testEventType = "TestEventType";
-    private JsonObject testData = Json.object().asObject()
+class EventTest {
+    private final String testEventType = "TestEventType";
+    private final JsonObject testData = Json.object().asObject()
             .set("TestField", "TestValue");
-    private JsonObject fullJsonObject = Json.object().asObject()
+    private final JsonObject fullJsonObject = Json.object().asObject()
             .set("event_type", testEventType)
             .set("data", testData);
 

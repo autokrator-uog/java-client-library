@@ -16,16 +16,17 @@ import java.util.logging.Logger;
 
 public class EventBusClient implements MessageHandler, CloseHandler {
     private static final Logger LOG = Logger.getLogger(EventBusClient.class.getName());
-    private String eventBusURI;
+    private final String eventBusURI;
     private wsWrapper wsWrapper;
-    private BlockingQueue<Event> inQueue = new LinkedBlockingQueue<>();
-    private BlockingQueue<Event> outQueue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<Event> inQueue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<Event> outQueue = new LinkedBlockingQueue<>();
     private ProducerThread producerThread;
 
     public EventBusClient(String eventBusURI) throws RuntimeException {
         this(new wsWrapper(URI.create(eventBusURI)));
     }
 
+    @SuppressWarnings("WeakerAccess")
     public EventBusClient(wsWrapper wrapper) {
         this.wsWrapper = wrapper;
         this.eventBusURI = wrapper.getConnectionURI().toString();

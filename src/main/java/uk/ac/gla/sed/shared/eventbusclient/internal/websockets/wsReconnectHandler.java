@@ -9,7 +9,7 @@ public class wsReconnectHandler extends ClientManager.ReconnectHandler {
     private static final Logger LOG = Logger.getLogger(wsReconnectHandler.class.getName());
     private static final int DEFAULT_RESET_COUNT = 10;
 
-    private int resetCount;
+    private final int resetCount;
     private int disconnectCounter = 0;
     private int connectFailureCounter = 0;
 

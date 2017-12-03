@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Logger;
 
+@SuppressWarnings("unused")
 @ClientEndpoint
 public class wsWrapper {
     private static final Logger LOG = Logger.getLogger(wsWrapper.class.getName());
@@ -19,9 +20,9 @@ public class wsWrapper {
      * java.util.logging.Logger
      */
 
-    private URI connectionURI;
+    private final URI connectionURI;
     private ClientManager client;
-    private ClientManager.ReconnectHandler reconnectHandler;
+    private final ClientManager.ReconnectHandler reconnectHandler;
 
     private Session userSession;
     private MessageHandler messageHandler;

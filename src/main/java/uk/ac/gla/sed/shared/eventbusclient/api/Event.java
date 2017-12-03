@@ -4,11 +4,15 @@ import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 
-public class Event {
-    public static String EVENT_TYPE_FIELD = "event_type";
-    public static String EVENT_DATA_FIELD = "data";
 
+public class Event {
+    public static final String EVENT_TYPE_FIELD = "event_type";
+    public static final String EVENT_DATA_FIELD = "data";
+
+    @SuppressWarnings("WeakerAccess")
     protected String type;
+
+    @SuppressWarnings("WeakerAccess")
     protected JsonObject data;
 
     public Event(String type, JsonObject data) {

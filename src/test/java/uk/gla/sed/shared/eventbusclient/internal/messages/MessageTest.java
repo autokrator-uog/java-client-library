@@ -15,11 +15,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class MessageTest {
-    private static MessageType testType = MessageType.NEW;
-    private static JsonObject testMessageObj = Json.object().asObject()
+class MessageTest {
+    private static final MessageType testType = MessageType.NEW;
+    private static final JsonObject testMessageObj = Json.object().asObject()
             .set("TestField", "TestValue");
-    private static JsonObject fullJson = Json.object().asObject()
+    private static final JsonObject fullJson = Json.object().asObject()
             .set(MessageType.MESSAGE_FIELD_NAME, testType.toString())
             .merge(testMessageObj);
 
@@ -71,6 +71,7 @@ public class MessageTest {
         });
     }
 
+    @SuppressWarnings("SpellCheckingInspection")
     @Test
     void testDeserializationMessageHasInvalidType() {
         final String someBadJson = Json.object().asObject()
