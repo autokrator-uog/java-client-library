@@ -22,6 +22,7 @@ public class wsWrapper {
 
     private final URI connectionURI;
     private ClientManager client;
+
     private final ClientManager.ReconnectHandler reconnectHandler;
 
     private Session userSession;
@@ -33,6 +34,7 @@ public class wsWrapper {
         reconnectHandler = new wsReconnectHandler();
     }
 
+    @SuppressWarnings("WeakerAccess")
     public wsWrapper(URI endpointURI, ClientManager.ReconnectHandler reconnectHandler) {
         connectionURI = endpointURI;
         this.reconnectHandler = reconnectHandler;
@@ -47,6 +49,7 @@ public class wsWrapper {
      *
      * @param userSession the userSession which is opened.
      */
+    @SuppressWarnings("WeakerAccess")
     @OnOpen
     public void onOpen(Session userSession) {
         LOG.info("Opening Websocket...");
@@ -59,6 +62,7 @@ public class wsWrapper {
      * @param userSession the userSession which is getting closed.
      * @param reason      the reason for connection close
      */
+    @SuppressWarnings("WeakerAccess")
     @OnClose
     public void onClose(Session userSession, CloseReason reason) {
         LOG.warning("Closing Websocket...");
@@ -73,6 +77,7 @@ public class wsWrapper {
      *
      * @param jsonMessage The message text (serialized json)
      */
+    @SuppressWarnings("WeakerAccess")
     @OnMessage
     public void onMessage(String jsonMessage) {
         if (this.messageHandler == null) {
@@ -88,6 +93,13 @@ public class wsWrapper {
         }
     }
 
+    /**
+     * Callback for Errors with the Websockets connection.
+     *
+     * @param session   The websockets session
+     * @param throwable The causing exception or null
+     */
+    @SuppressWarnings("WeakerAccess")
     @OnError
     public void onError(Session session, Throwable throwable) {
         if (throwable != null) {
@@ -98,6 +110,11 @@ public class wsWrapper {
         }
     }
 
+    /**
+     * This is the main method used to send messages via the websockets.
+     *
+     * @param message Takes a Message abstraction and sends it to the event bus.
+     */
     public void sendMessage(Message message) {
         String msgText = message.toString();
 
@@ -129,33 +146,47 @@ public class wsWrapper {
         }
     }
 
-    public ClientManager getClient() {
+    ClientManager getClient() {
         return client;
     }
 
-    public Session getUserSession() {
+    Session getUserSession() {
         return userSession;
     }
 
     /* THESE DEFINITELY SHOULD NOT BE PUBLIC, BUT IT'S THE ONLY WAY TO TEST THEM */
 
-    public MessageHandler getMessageHandler() {
+    MessageHandler getMessageHandler() {
         return messageHandler;
     }
 
+    /**
+     * The message handler is the callback delegate for when a new message is received.
+     * <p>
+     * This function allows you to set this delegate.
+     *
+     * @param msgHandler the delegate object, which must implement MessageHandler
+     */
     public void setMessageHandler(MessageHandler msgHandler) {
         this.messageHandler = msgHandler;
     }
 
-    public CloseHandler getCloseHandler() {
+    CloseHandler getCloseHandler() {
         return closeHandler;
     }
 
+    /**
+     * The close handler is a callback delegate for when the connection is closed, either expectedly or unexpectedly.
+     * <p>
+     * This function allows you to set this delegate.
+     *
+     * @param closeHandler the delegate object, which must implement CloseHandler
+     */
     public void setCloseHandler(CloseHandler closeHandler) {
         this.closeHandler = closeHandler;
     }
 
-    public ClientManager.ReconnectHandler getReconnectHandler() {
+    ClientManager.ReconnectHandler getReconnectHandler() {
         return reconnectHandler;
     }
 }

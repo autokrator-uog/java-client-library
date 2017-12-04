@@ -1,4 +1,4 @@
-package uk.ac.gla.sed.shared.eventbusclient.internal.testapp;
+package uk.ac.gla.sed.shared.eventbusclienttestapp;
 
 import uk.ac.gla.sed.shared.eventbusclient.api.Event;
 import uk.ac.gla.sed.shared.eventbusclient.api.EventBusClient;

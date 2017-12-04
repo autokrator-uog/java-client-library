@@ -7,6 +7,8 @@ import uk.ac.gla.sed.shared.eventbusclient.api.Event;
 import java.util.List;
 
 public class NewEventMessage extends Message {
+    public static final String EVENTS_FIELD_NAME = "events";
+
     public NewEventMessage(List<Event> events) {
         super(MessageType.NEW, Json.object());
 
@@ -19,6 +21,6 @@ public class NewEventMessage extends Message {
             eventsJsonArray.add(event.getFullEventObject());
         }
 
-        messageJsonObject.set("events", eventsJsonArray);
+        messageJsonObject.set(EVENTS_FIELD_NAME, eventsJsonArray);
     }
 }

@@ -1,4 +1,4 @@
-package uk.ac.gla.sed.shared.eventbusclient.internal.testapp;
+package uk.ac.gla.sed.shared.eventbusclienttestapp;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;

@@ -1,4 +1,4 @@
-package uk.gla.sed.shared.eventbusclient.internal.websockets;
+package uk.ac.gla.sed.shared.eventbusclient.internal.websockets;
 
 import com.eclipsesource.json.Json;
 import org.glassfish.tyrus.client.ClientManager;
@@ -10,9 +10,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import uk.ac.gla.sed.shared.eventbusclient.internal.messages.Message;
 import uk.ac.gla.sed.shared.eventbusclient.internal.messages.MessageType;
-import uk.ac.gla.sed.shared.eventbusclient.internal.websockets.CloseHandler;
-import uk.ac.gla.sed.shared.eventbusclient.internal.websockets.MessageHandler;
-import uk.ac.gla.sed.shared.eventbusclient.internal.websockets.wsWrapper;
 
 import javax.websocket.CloseReason;
 import javax.websocket.RemoteEndpoint;

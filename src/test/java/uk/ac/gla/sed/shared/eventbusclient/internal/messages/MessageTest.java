@@ -1,12 +1,9 @@
-package uk.gla.sed.shared.eventbusclient.internal.messages;
+package uk.ac.gla.sed.shared.eventbusclient.internal.messages;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.ac.gla.sed.shared.eventbusclient.internal.messages.InvalidMessageException;
-import uk.ac.gla.sed.shared.eventbusclient.internal.messages.Message;
-import uk.ac.gla.sed.shared.eventbusclient.internal.messages.MessageType;
 
 import java.util.ArrayList;
 import java.util.Comparator;

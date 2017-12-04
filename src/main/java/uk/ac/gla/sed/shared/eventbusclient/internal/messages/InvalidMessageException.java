@@ -1,11 +1,11 @@
 package uk.ac.gla.sed.shared.eventbusclient.internal.messages;
 
 public class InvalidMessageException extends RuntimeException {
-    public InvalidMessageException(String message) {
+    InvalidMessageException(String message) {
         super(message);
     }
 
-    public InvalidMessageException(String message, Throwable cause) {
+    InvalidMessageException(String message, Throwable cause) {
         super(message, cause);
     }
 }

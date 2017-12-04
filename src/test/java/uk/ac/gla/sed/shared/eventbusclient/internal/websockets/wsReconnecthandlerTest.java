@@ -1,8 +1,7 @@
-package uk.gla.sed.shared.eventbusclient.internal.websockets;
+package uk.ac.gla.sed.shared.eventbusclient.internal.websockets;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.ac.gla.sed.shared.eventbusclient.internal.websockets.wsReconnectHandler;
 
 import javax.websocket.CloseReason;
 

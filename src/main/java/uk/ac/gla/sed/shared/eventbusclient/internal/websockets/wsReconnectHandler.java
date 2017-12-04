@@ -5,7 +5,7 @@ import org.glassfish.tyrus.client.ClientManager;
 import javax.websocket.CloseReason;
 import java.util.logging.Logger;
 
-public class wsReconnectHandler extends ClientManager.ReconnectHandler {
+class wsReconnectHandler extends ClientManager.ReconnectHandler {
     private static final Logger LOG = Logger.getLogger(wsReconnectHandler.class.getName());
     private static final int DEFAULT_RESET_COUNT = 10;
 
@@ -13,11 +13,11 @@ public class wsReconnectHandler extends ClientManager.ReconnectHandler {
     private int disconnectCounter = 0;
     private int connectFailureCounter = 0;
 
-    public wsReconnectHandler() {
+    wsReconnectHandler() {
         resetCount = DEFAULT_RESET_COUNT;
     }
 
-    public wsReconnectHandler(int resetCount) {
+    wsReconnectHandler(int resetCount) {
         this.resetCount = resetCount;
     }
 

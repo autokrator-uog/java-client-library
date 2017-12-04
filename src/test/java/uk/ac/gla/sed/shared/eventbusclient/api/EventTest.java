@@ -1,9 +1,8 @@
-package uk.gla.sed.shared.eventbusclient.api;
+package uk.ac.gla.sed.shared.eventbusclient.api;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import org.junit.jupiter.api.Test;
-import uk.ac.gla.sed.shared.eventbusclient.api.Event;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -52,7 +51,7 @@ class EventTest {
     void testDeserializingConstructorInvalidJson() {
         final String someInvalidJson = "]";
 
-        assertThrows(RuntimeException.class, () -> {
+        assertThrows(InvalidEventException.class, () -> {
             Event deserailizedEvent = new Event(someInvalidJson);
         });
     }
@@ -62,7 +61,7 @@ class EventTest {
     void testDeserializingConstructorNotJsonObject() {
         final String someInvalidJson = "[]";
 
-        assertThrows(RuntimeException.class, () -> {
+        assertThrows(InvalidEventException.class, () -> {
             Event deserailizedEvent = new Event(someInvalidJson);
         });
     }
@@ -73,7 +72,7 @@ class EventTest {
                 .set(Event.EVENT_DATA_FIELD, testData)
                 .toString();
 
-        assertThrows(RuntimeException.class, () -> {
+        assertThrows(InvalidEventException.class, () -> {
             Event deserailizedEvent = new Event(someInvalidJson);
         });
     }
@@ -84,7 +83,7 @@ class EventTest {
                 .set(Event.EVENT_TYPE_FIELD, testEventType)
                 .toString();
 
-        assertThrows(RuntimeException.class, () -> {
+        assertThrows(InvalidEventException.class, () -> {
             Event deserailizedEvent = new Event(someInvalidJson);
         });
     }
@@ -96,7 +95,7 @@ class EventTest {
                 .set(Event.EVENT_DATA_FIELD, "")
                 .toString();
 
-        assertThrows(RuntimeException.class, () -> {
+        assertThrows(InvalidEventException.class, () -> {
             Event deserailizedEvent = new Event(someInvalidJson);
         });
     }
@@ -109,7 +108,7 @@ class EventTest {
                 .set(Event.EVENT_DATA_FIELD, testData)
                 .toString();
 
-        assertThrows(RuntimeException.class, () -> {
+        assertThrows(InvalidEventException.class, () -> {
             Event deserailizedEvent = new Event(someInvalidJson);
         });
     }
