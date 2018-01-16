@@ -14,10 +14,14 @@ import com.eclipsesource.json.ParseException;
  */
 public class Event {
     public static final String EVENT_TYPE_FIELD = "event_type";
+    public static final String CORRELATION_ID_FIELD = "correlation_id";
     public static final String EVENT_DATA_FIELD = "data";
 
     @SuppressWarnings("WeakerAccess")
     protected String type;
+
+    @SuppressWarnings("WeakerAccess")
+    protected long correlationId;
 
     @SuppressWarnings("WeakerAccess")
     protected JsonObject data;
@@ -30,6 +34,7 @@ public class Event {
      */
     public Event(String type, JsonObject data) {
         this.type = type;
+        this.correlationId = 0;
         this.data = data;
     }
 
@@ -65,6 +70,17 @@ public class Event {
 
         // =================================================
         // extract data and ensure it's a JSON object
+        JsonValue correlationIdValue = eventJsonObject.get(CORRELATION_ID_FIELD);
+        if (correlationIdValue == null) {
+            throw new InvalidEventException(String.format("Event is not valid - there is no '%s' property specified and there should be!", CORRELATION_ID_FIELD));
+        }
+        if (!correlationIdValue.isNumber()) {
+            throw new InvalidEventException(String.format("Event is not valid - the '%s' property should be a JSON number and it isn't!", CORRELATION_ID_FIELD));
+        }
+        this.correlationId = eventJsonObject.get(CORRELATION_ID_FIELD).asLong();
+
+        // =================================================
+        // extract data and ensure it's a JSON object
         JsonValue dataValue = eventJsonObject.get(EVENT_DATA_FIELD);
         if (dataValue == null) {
             throw new InvalidEventException(String.format("Event is not valid - there is no '%s' property specified and there should be!", EVENT_DATA_FIELD));
@@ -84,6 +100,14 @@ public class Event {
         return type;
     }
 
+    protected long getCorrelationId() {
+        return correlationId;
+    }
+
+    protected void setCorrelationId(long correlationId) {
+        this.correlationId = correlationId;
+    }
+
     public JsonObject getData() {
         return data;
     }
@@ -95,8 +119,9 @@ public class Event {
      */
     public JsonObject getFullEventObject() {
         JsonObject eventJson = Json.object().asObject();
-        eventJson.set("event_type", type);
-        eventJson.set("data", data);
+        eventJson.set(EVENT_TYPE_FIELD, type);
+        eventJson.set(CORRELATION_ID_FIELD, correlationId);
+        eventJson.set(EVENT_DATA_FIELD, data);
         return eventJson;
     }
 }

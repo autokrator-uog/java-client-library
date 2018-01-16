@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
 /**
@@ -118,7 +119,12 @@ public class EventBusClient implements MessageHandler, CloseHandler {
      *
      * @param event the event you'd like to send.
      */
-    public void sendEvent(Event event) {
+    public void sendEvent(Event event, Event correlatedEvent) {
+        if (correlatedEvent == null) {
+            event.setCorrelationId(ThreadLocalRandom.current().nextLong(999999999));
+        } else {
+            event.setCorrelationId(correlatedEvent.getCorrelationId());
+        }
         outQueue.add(event);
     }
 
