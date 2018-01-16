@@ -13,6 +13,7 @@ class EventTest {
             .set("TestField", "TestValue");
     private final JsonObject fullJsonObject = Json.object().asObject()
             .set("event_type", testEventType)
+            .set("correlation_id", 0)
             .set("data", testData);
 
     @Test
@@ -40,7 +41,6 @@ class EventTest {
     @Test
     void testDeserializingConstructor() {
         Event deserailizedEvent = new Event(fullJsonObject.toString());
-
 
         assertEquals(testEventType, deserailizedEvent.getType());
         assertEquals(testData, deserailizedEvent.getData());

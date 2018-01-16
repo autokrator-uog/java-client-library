@@ -12,6 +12,7 @@ import uk.ac.gla.sed.shared.eventbusclient.internal.websockets.wsWrapper;
 
 import javax.websocket.CloseReason;
 import java.net.URI;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -19,10 +20,12 @@ import static org.mockito.Mockito.*;
 
 class EventBusClientTest {
     private static final String testEventType = "TestEventType";
+    private static final long testCorrelationId = 583794728;
     private static final JsonObject testEventData = Json.object().asObject().set("TestField", "TestValue");
     private static final JsonObject exampleMessageJson = Json.object().asObject()
             .set(MessageType.MESSAGE_FIELD_NAME, MessageType.EVENT.toString())
             .set(Event.EVENT_TYPE_FIELD, testEventType)
+            .set(Event.CORRELATION_ID_FIELD, testCorrelationId)
             .set(Event.EVENT_DATA_FIELD, testEventData);
     private EventBusClient client;
     private wsWrapper wrapper;
@@ -58,10 +61,32 @@ class EventBusClientTest {
     @Test
     void testSendEvent() {
         Event e = new Event("TestEventType", Json.object().asObject());
+        client.sendEvent(e, null);
 
-        client.sendEvent(e);
+        List<Event> queue = client.getEventsInOutQueue();
+        assertTrue(queue.size() == 1);
+        Event out = queue.get(0);
+        assertTrue(out.getType() == e.getType());
+        assertTrue(out.getData() == e.getData());
+    }
 
-        assertTrue(client.getEventsInOutQueue().contains(e));
+    @Test
+    void testSendCorrelatedEvent() {
+        Event e1 = new Event("TestEventType", Json.object().asObject());
+        Event e2 = new Event("TestEventType", Json.object().asObject());
+
+        client.sendEvent(e1, null);
+        client.sendEvent(e2, e1);
+
+        List<Event> queue = client.getEventsInOutQueue();
+        assertTrue(queue.size() == 2);
+        Event first = queue.get(0);
+        assertTrue(first.getType() == e1.getType());
+        assertTrue(first.getData() == e1.getData());
+        Event second = queue.get(1);
+        assertTrue(second.getType() == e2.getType());
+        assertTrue(second.getData() == e2.getData());
+        assertTrue(second.getCorrelationId() == first.getCorrelationId());
     }
 
     @Test

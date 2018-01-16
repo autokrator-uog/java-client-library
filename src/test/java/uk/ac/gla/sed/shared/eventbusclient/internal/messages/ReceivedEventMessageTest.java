@@ -10,11 +10,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ReceivedEventMessageTest {
     private static final String testEventType = "TestEventType";
+    private static final long testCorrelationId = 584937848;
     private static final JsonObject testEventData = Json.object().asObject().set("TestField", "TestValue");
 
     private static final JsonObject exampleMessageJson = Json.object().asObject()
             .set(MessageType.MESSAGE_FIELD_NAME, MessageType.EVENT.toString())
             .set(Event.EVENT_TYPE_FIELD, testEventType)
+            .set(Event.CORRELATION_ID_FIELD, testCorrelationId)
             .set(Event.EVENT_DATA_FIELD, testEventData);
 
     @Test

@@ -26,7 +26,7 @@ class TestProduce {
 
             try {
                 System.out.println(String.format("[%s] Sending event...", new Date().toString()));
-                client.sendEvent(newEvent);
+                client.sendEvent(newEvent, null);
                 Thread.sleep(15000);
             } catch (Exception e) {
                 break;
