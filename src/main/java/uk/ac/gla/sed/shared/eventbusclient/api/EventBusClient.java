@@ -41,7 +41,7 @@ public class EventBusClient implements MessageHandler, CloseHandler {
     private final BlockingQueue<Event> inQueue = new LinkedBlockingQueue<>();
     private final BlockingQueue<Event> outQueue = new LinkedBlockingQueue<>();
     private final ConcurrentHashMap<String, Event> consistencyMap = new ConcurrentHashMap<>();
-    private final BlockingQueue<Event> failedQueue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<ReturningEvent> returningQueue = new LinkedBlockingQueue<>();
     private final ProducerThread producerThread;
 
     // constructors
@@ -87,6 +87,10 @@ public class EventBusClient implements MessageHandler, CloseHandler {
      */
     public BlockingQueue<Event> getIncomingEventsQueue() {
         return inQueue;
+    }
+
+    public BlockingQueue<ReturningEvent> getReturningQueue() {
+        return returningQueue;
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -136,24 +140,17 @@ public class EventBusClient implements MessageHandler, CloseHandler {
             event.setCorrelationId(correlatedEvent.getCorrelationId());
         }
         try{
-        /*MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
-        String toHash = event.getData().toString();
-        sha1.update(toHash.getBytes("utf-8"));
-        String hash = Base64Utils.(sha1.digest());
-        //String hash = new String(sha1.digest());*/
+            MessageDigest mDigest = MessageDigest.getInstance("SHA1");
+            byte[] result = mDigest.digest(event.getData().toString().getBytes("UTF-8"));
 
-        MessageDigest mDigest = MessageDigest.getInstance("SHA1");
-        byte[] result = mDigest.digest(event.getData().toString().getBytes());
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < result.length; i++) {
-            sb.append(Integer.toString((result[i] & 0xff) + 0x100, 16).substring(1));
-        }
+            StringBuilder hash = new StringBuilder();
 
-        String hash = sb.toString();
+            for (byte current : result) {
+                hash.append(Integer.toString( (current & 0xff) + 0x100, 16).substring( 1 ));
+            }
 
-        consistencyMap.put(hash, event);
-        System.out.println(hash);
-        } catch (NoSuchAlgorithmException e) {
+            consistencyMap.put(hash.toString(), event);
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
             LOG.severe("Hashing failed: " + e.getMessage());
         }
 
@@ -174,19 +171,19 @@ public class EventBusClient implements MessageHandler, CloseHandler {
                 break;
             case RECEIPT:
                 ReceivedReceiptMessage receivedReceiptMessage = new ReceivedReceiptMessage(message.toString());
-                Receipt receivedReceipt = receivedReceiptMessage.getReceivedReceipt();
-                System.out.println(receivedReceipt.checksum);
-                if (consistencyMap.containsKey(receivedReceipt.checksum)){
-                    if (receivedReceipt.status == "inconsistent"){
+                List<Receipt> receivedReceipts = receivedReceiptMessage.getReceivedReceipts();
+
+                for (Receipt receipt : receivedReceipts){
+                    if (consistencyMap.containsKey(receipt.checksum)){
                         try{
-                        failedQueue.put(consistencyMap.get(receivedReceipt.checksum));
+                            returningQueue.put(new ReturningEvent(consistencyMap.get(receipt.checksum), Status.getStatusFromString(receipt.status)));
                         } catch (InterruptedException interrupt) {
                             LOG.severe("MessageHandler interrupted!!");
                         }
+                        consistencyMap.remove(receipt.checksum);
+                    } else {
+                        LOG.severe("Can't find this event in the map. What has happened?");
                     }
-                    consistencyMap.remove(receivedReceipt.checksum);
-                } else {
-                    LOG.severe("Can't find this event in the map. What has happened?");
                 }
             default:
                 LOG.fine(String.format("Skipping event of type %s", message.getType()));
