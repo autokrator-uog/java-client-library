@@ -9,16 +9,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class EventTest {
     private final String testEventType = "TestEventType";
+    private static final JsonObject testConsistency = new Consistency("test", "*").getFullConsistencyObject();
     private final JsonObject testData = Json.object().asObject()
             .set("TestField", "TestValue");
     private final JsonObject fullJsonObject = Json.object().asObject()
             .set("event_type", testEventType)
             .set("correlation_id", 0)
-            .set("data", testData);
+            .set("data", testData)
+            .set("consistency", testConsistency);
 
     @Test
     void testSimpleConstructor() {
-        Event event = new Event(testEventType, testData);
+        Event event = new Event(testEventType, testData, new Consistency("test","*"));
 
         assertEquals(testEventType, event.getType());
         assertEquals(testData, event.getData());
@@ -26,13 +28,13 @@ class EventTest {
 
     @Test
     void testToString() {
-        Event event = new Event(testEventType, testData);
+        Event event = new Event(testEventType, testData, new Consistency("test","*"));
         assertEquals(fullJsonObject.toString(), event.toString());
     }
 
     @Test
     void testFullObjectSerialization() {
-        Event event = new Event(testEventType, testData);
+        Event event = new Event(testEventType, testData, new Consistency("test","*"));
         JsonObject serialized = event.getFullEventObject();
 
         assertEquals(fullJsonObject, serialized);

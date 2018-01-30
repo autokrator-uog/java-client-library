@@ -22,11 +22,13 @@ class EventBusClientTest {
     private static final String testEventType = "TestEventType";
     private static final long testCorrelationId = 583794728;
     private static final JsonObject testEventData = Json.object().asObject().set("TestField", "TestValue");
+    private static final JsonObject testConsistency = new Consistency("test", "*").getFullConsistencyObject();
     private static final JsonObject exampleMessageJson = Json.object().asObject()
             .set(MessageType.MESSAGE_FIELD_NAME, MessageType.EVENT.toString())
             .set(Event.EVENT_TYPE_FIELD, testEventType)
             .set(Event.CORRELATION_ID_FIELD, testCorrelationId)
-            .set(Event.EVENT_DATA_FIELD, testEventData);
+            .set(Event.EVENT_DATA_FIELD, testEventData)
+            .set(Event.CONSISTENCY_FIELD, testConsistency);
     private EventBusClient client;
     private wsWrapper wrapper;
 
@@ -60,7 +62,7 @@ class EventBusClientTest {
 
     @Test
     void testSendEvent() {
-        Event e = new Event("TestEventType", Json.object().asObject());
+        Event e = new Event("TestEventType", Json.object().asObject(), new Consistency("1","*"));
         client.sendEvent(e, null);
 
         List<Event> queue = client.getEventsInOutQueue();
@@ -72,8 +74,8 @@ class EventBusClientTest {
 
     @Test
     void testSendCorrelatedEvent() {
-        Event e1 = new Event("TestEventType", Json.object().asObject());
-        Event e2 = new Event("TestEventType", Json.object().asObject());
+        Event e1 = new Event("TestEventType", Json.object().asObject(),new Consistency("test","*"));
+        Event e2 = new Event("TestEventType", Json.object().asObject(),new Consistency("test","*"));
 
         client.sendEvent(e1, null);
         client.sendEvent(e2, e1);

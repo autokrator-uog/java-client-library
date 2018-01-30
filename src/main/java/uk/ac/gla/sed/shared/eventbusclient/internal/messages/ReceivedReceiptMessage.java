@@ -23,9 +23,6 @@ public class ReceivedReceiptMessage extends Message {
 
         JsonObject clone = Json.object().asObject().merge(messageJsonObject);
         clone.remove(MessageType.MESSAGE_FIELD_NAME);
-        clone.remove("timestamp");
-        clone.remove("sender");
-
 
         for (JsonValue receipt : clone.get("receipts").asArray()){
             receiptsIn.add(new Receipt(receipt.toString()));

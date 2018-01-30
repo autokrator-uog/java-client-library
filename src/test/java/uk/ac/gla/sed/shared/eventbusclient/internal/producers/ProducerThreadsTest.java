@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
+import uk.ac.gla.sed.shared.eventbusclient.api.Consistency;
 import uk.ac.gla.sed.shared.eventbusclient.api.Event;
 import uk.ac.gla.sed.shared.eventbusclient.internal.messages.Message;
 import uk.ac.gla.sed.shared.eventbusclient.internal.messages.MessageType;
@@ -76,7 +77,7 @@ class ProducerThreadsTest {
             fail(e);
         }
 
-        Event event = new Event("TestEventType", Json.object().asObject().set("Test", "Test"));
+        Event event = new Event("TestEventType", Json.object().asObject().set("Test", "Test"), new Consistency("test","*"));
         outQueue.add(event);
 
         thread.start();

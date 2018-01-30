@@ -2,6 +2,7 @@ package uk.ac.gla.sed.shared.eventbusclienttestapp;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
+import uk.ac.gla.sed.shared.eventbusclient.api.Consistency;
 import uk.ac.gla.sed.shared.eventbusclient.api.Event;
 import uk.ac.gla.sed.shared.eventbusclient.api.EventBusClient;
 
@@ -16,13 +17,14 @@ class TestProduce {
 
         int i = 0;
         while (true) {
+            System.out.println(client.getIncomingEventsQueue().isEmpty());
             JsonObject body = Json.object().asObject();
             body.set("TransactionID", String.valueOf(i++));
             body.set("FromAccountID", "1");
             body.set("ToAccountID", "2");
             body.set("Amount", "2000.0");
 
-            Event newEvent = new Event("PendingTransaction", body);
+            Event newEvent = new Event("PendingTransaction", body, new Consistency("acc1","*"));
 
             try {
                 System.out.println(String.format("[%s] Sending event...", new Date().toString()));
