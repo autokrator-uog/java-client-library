@@ -17,6 +17,14 @@ public class Consistency {
         this.value = value;
     }
 
+    public String getKey() {
+        return key;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
     public Consistency(String jsonSerialized) {
         JsonValue json;
         try {

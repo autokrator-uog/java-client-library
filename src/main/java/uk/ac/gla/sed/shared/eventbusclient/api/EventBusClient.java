@@ -159,6 +159,7 @@ public class EventBusClient implements MessageHandler, CloseHandler {
 
     @Override
     public void handleMessage(Message message) {
+        System.out.println(message.getType().toString());
         switch (message.getType()) {
             case EVENT:
                 ReceivedEventMessage received = new ReceivedEventMessage(message.toString());

@@ -128,6 +128,10 @@ public class Event {
         return data;
     }
 
+    public Consistency getConsistency() {
+        return consistency;
+    }
+
     /**
      * Get the full representation of the event as a JSON object.
      *
