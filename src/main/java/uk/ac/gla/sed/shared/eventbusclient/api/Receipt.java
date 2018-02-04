@@ -4,7 +4,6 @@ import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
-import uk.ac.gla.sed.shared.eventbusclient.internal.messages.MessageType;
 
 public class Receipt {
     public static final String CHECKSUM_FIELD = "checksum";

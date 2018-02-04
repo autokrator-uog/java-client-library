@@ -27,6 +27,7 @@ public class Event {
     @SuppressWarnings("WeakerAccess")
     protected JsonObject data;
 
+    @SuppressWarnings("WeakerAccess")
     protected Consistency consistency;
 
     /**
@@ -130,6 +131,10 @@ public class Event {
 
     public Consistency getConsistency() {
         return consistency;
+    }
+
+    public void setConsistency(Consistency consistency) {
+        this.consistency = consistency;
     }
 
     /**

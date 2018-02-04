@@ -1,10 +1,9 @@
 package uk.ac.gla.sed.shared.eventbusclient.api;
 
-import org.glassfish.tyrus.core.Base64Utils;
-import org.junit.jupiter.params.shadow.com.univocity.parsers.common.iterators.RecordIterator;
 import uk.ac.gla.sed.shared.eventbusclient.internal.messages.Message;
 import uk.ac.gla.sed.shared.eventbusclient.internal.messages.ReceivedEventMessage;
 import uk.ac.gla.sed.shared.eventbusclient.internal.messages.ReceivedReceiptMessage;
+import uk.ac.gla.sed.shared.eventbusclient.internal.messages.RegisterMessage;
 import uk.ac.gla.sed.shared.eventbusclient.internal.producers.ProducerThread;
 import uk.ac.gla.sed.shared.eventbusclient.internal.producers.SingleEventProducerThread;
 import uk.ac.gla.sed.shared.eventbusclient.internal.websockets.CloseHandler;
@@ -17,7 +16,6 @@ import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -135,7 +133,9 @@ public class EventBusClient implements MessageHandler, CloseHandler {
      */
     public void sendEvent(Event event, Event correlatedEvent) {
         if (correlatedEvent == null) {
-            event.setCorrelationId(ThreadLocalRandom.current().nextLong(999999999));
+            if (event.getCorrelationId() == 0) {
+                event.setCorrelationId(ThreadLocalRandom.current().nextLong(999999999));
+            }
         } else {
             event.setCorrelationId(correlatedEvent.getCorrelationId());
         }
@@ -155,6 +155,10 @@ public class EventBusClient implements MessageHandler, CloseHandler {
         }
 
         outQueue.add(event);
+    }
+
+    public void register(RegisterMessage registration) {
+        wsWrapper.sendMessage(registration);
     }
 
     @Override
@@ -186,6 +190,7 @@ public class EventBusClient implements MessageHandler, CloseHandler {
                         LOG.severe("Can't find this event in the map. What has happened?");
                     }
                 }
+                break;
             default:
                 LOG.fine(String.format("Skipping event of type %s", message.getType()));
                 break;
