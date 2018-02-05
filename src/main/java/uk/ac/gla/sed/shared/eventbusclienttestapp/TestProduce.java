@@ -19,7 +19,6 @@ class TestProduce {
 
         int i = 0;
         while (true) {
-            System.out.println(client.getIncomingEventsQueue().isEmpty());
             JsonObject body = Json.object().asObject();
             body.set("TransactionID", String.valueOf(i++));
             body.set("FromAccountID", "1");

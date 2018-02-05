@@ -5,7 +5,8 @@ public enum MessageType {
     EVENT("event"),
     QUERY("query"),
     RECEIPT("receipt"),
-    REGISTER("register");
+    REGISTER("register"),
+    REGISTRATION("registration");
 
     public static final String MESSAGE_FIELD_NAME = "message_type";
     private final String text;

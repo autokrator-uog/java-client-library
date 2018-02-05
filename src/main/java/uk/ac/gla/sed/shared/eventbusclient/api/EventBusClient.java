@@ -139,21 +139,7 @@ public class EventBusClient implements MessageHandler, CloseHandler {
         } else {
             event.setCorrelationId(correlatedEvent.getCorrelationId());
         }
-        try{
-            MessageDigest mDigest = MessageDigest.getInstance("SHA1");
-            byte[] result = mDigest.digest(event.getData().toString().getBytes("UTF-8"));
-
-            StringBuilder hash = new StringBuilder();
-
-            for (byte current : result) {
-                hash.append(Integer.toString( (current & 0xff) + 0x100, 16).substring( 1 ));
-            }
-
-            consistencyMap.put(hash.toString(), event);
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            LOG.severe("Hashing failed: " + e.getMessage());
-        }
-
+        consistencyMap.put(hashSHA1(event), event);
         outQueue.add(event);
     }
 
@@ -163,7 +149,6 @@ public class EventBusClient implements MessageHandler, CloseHandler {
 
     @Override
     public void handleMessage(Message message) {
-        System.out.println(message.getType().toString());
         switch (message.getType()) {
             case EVENT:
                 ReceivedEventMessage received = new ReceivedEventMessage(message.toString());
@@ -187,7 +172,7 @@ public class EventBusClient implements MessageHandler, CloseHandler {
                         }
                         consistencyMap.remove(receipt.checksum);
                     } else {
-                        LOG.severe("Can't find this event in the map. What has happened?");
+                        LOG.severe("Message with checksum " + receipt.checksum + " was not found in the consistency hashmap.");
                     }
                 }
                 break;
@@ -202,6 +187,22 @@ public class EventBusClient implements MessageHandler, CloseHandler {
         // retry logic is embedded in wsWrapper
         // so, at this point, just give up.
         stop();
+    }
+
+    public String hashSHA1(Event event) {
+        StringBuilder hash = new StringBuilder();
+        try{
+            MessageDigest mDigest = MessageDigest.getInstance("SHA1");
+            byte[] result = mDigest.digest(event.getData().toString().getBytes("UTF-8"));
+
+            for (byte current : result) {
+                hash.append(Integer.toString( (current & 0xff) + 0x100, 16).substring( 1 ));
+            }
+
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            LOG.severe("Hashing failed: " + e.getMessage());
+        }
+        return hash.toString();
     }
 
 }

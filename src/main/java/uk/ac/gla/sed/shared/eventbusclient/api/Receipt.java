@@ -4,6 +4,7 @@ import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
+import uk.ac.gla.sed.shared.eventbusclient.internal.messages.InvalidMessageException;
 
 public class Receipt {
     public static final String CHECKSUM_FIELD = "checksum";
@@ -25,12 +26,12 @@ public class Receipt {
         try {
             json = Json.parse(jsonSerialized);
         } catch (ParseException e) {
-            throw new InvalidEventException("Receipt is not valid JSON!", e);
+            throw new InvalidReceiptException("Receipt is not valid JSON!", e);
         }
 
         // ensure it's a valid json object
         if (!json.isObject()) {
-            throw new InvalidEventException("Receipt is not valid - the event should be a JSON object and it isn't!");
+            throw new InvalidReceiptException("Receipt is not valid - the event should be a JSON object and it isn't!");
         }
         JsonObject receiptJsonObject = json.asObject();
 
@@ -38,10 +39,10 @@ public class Receipt {
         // extract the checksum and ensure it's a string
         JsonValue checksumValue = receiptJsonObject.get(CHECKSUM_FIELD);
         if (checksumValue == null) {
-            throw new InvalidEventException(String.format("Receipt is not valid - there is no '%s' property specified and there should be!", CHECKSUM_FIELD));
+            throw new InvalidReceiptException(String.format("Receipt is not valid - there is no '%s' property specified and there should be!", CHECKSUM_FIELD));
         }
         if (!checksumValue.isString()) {
-            throw new InvalidEventException(String.format("Event is not valid - the '%s' property should be a string!", CHECKSUM_FIELD));
+            throw new InvalidReceiptException(String.format("Receipt is not valid - the '%s' property should be a string!", CHECKSUM_FIELD));
         }
         this.checksum = receiptJsonObject.get(CHECKSUM_FIELD).asString();
 
@@ -49,12 +50,16 @@ public class Receipt {
         // extract the status and ensure it's a string
         JsonValue statusValue = receiptJsonObject.get(STATUS_FIELD);
         if (statusValue == null) {
-            throw new InvalidEventException(String.format("Receipt is not valid - there is no '%s' property specified and there should be!", STATUS_FIELD));
+            throw new InvalidReceiptException(String.format("Receipt is not valid - there is no '%s' property specified and there should be!", STATUS_FIELD));
         }
         if (!statusValue.isString()) {
-            throw new InvalidEventException(String.format("Event is not valid - the '%s' property should be a string!", STATUS_FIELD));
+            throw new InvalidReceiptException(String.format("Receipt is not valid - the '%s' property should be a string!", STATUS_FIELD));
         }
-        this.status = receiptJsonObject.get(STATUS_FIELD).asString();
+        try {
+            this.status = Status.getStatusFromString(receiptJsonObject.get(STATUS_FIELD).asString()).toString();
+        } catch (IllegalArgumentException cause) {
+            throw new InvalidReceiptException(String.format("Status %s is not valid", receiptJsonObject.get(STATUS_FIELD).asString()), cause);
+        }
     }
 
     @Override
