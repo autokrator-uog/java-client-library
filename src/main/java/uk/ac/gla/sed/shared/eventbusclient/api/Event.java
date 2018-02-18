@@ -16,6 +16,7 @@ public class Event {
     public static final String EVENT_TYPE_FIELD = "event_type";
     public static final String CORRELATION_ID_FIELD = "correlation_id";
     public static final String EVENT_DATA_FIELD = "data";
+    public static final String CONSISTENCY_FIELD = "consistency";
 
     @SuppressWarnings("WeakerAccess")
     protected String type;
@@ -26,16 +27,20 @@ public class Event {
     @SuppressWarnings("WeakerAccess")
     protected JsonObject data;
 
+    @SuppressWarnings("WeakerAccess")
+    protected Consistency consistency;
+
     /**
      * Constructor for creating an event from scratch in Java.
      *
      * @param type the event_type for this event
      * @param data the data for the event as a com.eclipsesource.json.JsonObject
      */
-    public Event(String type, JsonObject data) {
+    public Event(String type, JsonObject data, Consistency consistency) {
         this.type = type;
         this.correlationId = 0;
         this.data = data;
+        this.consistency = consistency;
     }
 
     /**
@@ -89,6 +94,18 @@ public class Event {
             throw new InvalidEventException(String.format("Event is not valid - the '%s' property should be a JSON Object and it isn't!", EVENT_DATA_FIELD));
         }
         this.data = eventJsonObject.get(EVENT_DATA_FIELD).asObject();
+
+
+        // =================================================
+        // extract data and ensure it's a JSON object
+        JsonValue consistencyData = eventJsonObject.get(CONSISTENCY_FIELD);
+        if (consistencyData == null) {
+            throw new InvalidEventException(String.format("Event is not valid - there is no '%s' property specified and there should be!", CONSISTENCY_FIELD));
+        }
+        if (!consistencyData.isObject()) {
+            throw new InvalidEventException(String.format("Event is not valid - the '%s' property should be a JSON Object and it isn't!", CONSISTENCY_FIELD));
+        }
+        this.consistency = new Consistency(eventJsonObject.get(CONSISTENCY_FIELD).toString());
     }
 
     @Override
@@ -112,6 +129,14 @@ public class Event {
         return data;
     }
 
+    public Consistency getConsistency() {
+        return consistency;
+    }
+
+    public void setConsistency(Consistency consistency) {
+        this.consistency = consistency;
+    }
+
     /**
      * Get the full representation of the event as a JSON object.
      *
@@ -122,6 +147,7 @@ public class Event {
         eventJson.set(EVENT_TYPE_FIELD, type);
         eventJson.set(CORRELATION_ID_FIELD, correlationId);
         eventJson.set(EVENT_DATA_FIELD, data);
+        eventJson.set(CONSISTENCY_FIELD, consistency.getFullConsistencyObject());
         return eventJson;
     }
 }

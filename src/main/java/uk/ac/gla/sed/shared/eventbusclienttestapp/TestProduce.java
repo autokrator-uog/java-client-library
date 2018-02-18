@@ -2,9 +2,12 @@ package uk.ac.gla.sed.shared.eventbusclienttestapp;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
+import uk.ac.gla.sed.shared.eventbusclient.api.Consistency;
 import uk.ac.gla.sed.shared.eventbusclient.api.Event;
 import uk.ac.gla.sed.shared.eventbusclient.api.EventBusClient;
+import uk.ac.gla.sed.shared.eventbusclient.internal.messages.RegisterMessage;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 class TestProduce {
@@ -22,7 +25,13 @@ class TestProduce {
             body.set("ToAccountID", "2");
             body.set("Amount", "2000.0");
 
-            Event newEvent = new Event("PendingTransaction", body);
+            ArrayList<String> interestedEvents = new ArrayList<>();
+            interestedEvents.add("PendingTransaction");
+            interestedEvents.add("AccountCreationRequest");
+            RegisterMessage reg = new RegisterMessage("accounts", interestedEvents);
+            client.register(reg);
+
+            Event newEvent = new Event("PendingTransaction", body, new Consistency("acc1","*"));
 
             try {
                 System.out.println(String.format("[%s] Sending event...", new Date().toString()));

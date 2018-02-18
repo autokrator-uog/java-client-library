@@ -2,6 +2,8 @@ package uk.ac.gla.sed.shared.eventbusclient.api;
 
 import uk.ac.gla.sed.shared.eventbusclient.internal.messages.Message;
 import uk.ac.gla.sed.shared.eventbusclient.internal.messages.ReceivedEventMessage;
+import uk.ac.gla.sed.shared.eventbusclient.internal.messages.ReceivedReceiptMessage;
+import uk.ac.gla.sed.shared.eventbusclient.internal.messages.RegisterMessage;
 import uk.ac.gla.sed.shared.eventbusclient.internal.producers.ProducerThread;
 import uk.ac.gla.sed.shared.eventbusclient.internal.producers.SingleEventProducerThread;
 import uk.ac.gla.sed.shared.eventbusclient.internal.websockets.CloseHandler;
@@ -9,10 +11,14 @@ import uk.ac.gla.sed.shared.eventbusclient.internal.websockets.MessageHandler;
 import uk.ac.gla.sed.shared.eventbusclient.internal.websockets.wsWrapper;
 
 import javax.websocket.CloseReason;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
@@ -32,6 +38,8 @@ public class EventBusClient implements MessageHandler, CloseHandler {
 
     private final BlockingQueue<Event> inQueue = new LinkedBlockingQueue<>();
     private final BlockingQueue<Event> outQueue = new LinkedBlockingQueue<>();
+    private final ConcurrentHashMap<String, Event> consistencyMap = new ConcurrentHashMap<>();
+    private final BlockingQueue<ReturningEvent> returningQueue = new LinkedBlockingQueue<>();
     private final ProducerThread producerThread;
 
     // constructors
@@ -79,6 +87,10 @@ public class EventBusClient implements MessageHandler, CloseHandler {
         return inQueue;
     }
 
+    public BlockingQueue<ReturningEvent> getReturningQueue() {
+        return returningQueue;
+    }
+
     @SuppressWarnings("WeakerAccess")
     public List<Event> getEventsInOutQueue() {
         return new ArrayList<>(outQueue);
@@ -121,11 +133,18 @@ public class EventBusClient implements MessageHandler, CloseHandler {
      */
     public void sendEvent(Event event, Event correlatedEvent) {
         if (correlatedEvent == null) {
-            event.setCorrelationId(ThreadLocalRandom.current().nextLong(999999999));
+            if (event.getCorrelationId() == 0) {
+                event.setCorrelationId(ThreadLocalRandom.current().nextLong(999999999));
+            }
         } else {
             event.setCorrelationId(correlatedEvent.getCorrelationId());
         }
+        consistencyMap.put(hashSHA1(event), event);
         outQueue.add(event);
+    }
+
+    public void register(RegisterMessage registration) {
+        wsWrapper.sendMessage(registration);
     }
 
     @Override
@@ -140,6 +159,23 @@ public class EventBusClient implements MessageHandler, CloseHandler {
                     LOG.severe("MessageHandler interrupted!!");
                 }
                 break;
+            case RECEIPT:
+                ReceivedReceiptMessage receivedReceiptMessage = new ReceivedReceiptMessage(message.toString());
+                List<Receipt> receivedReceipts = receivedReceiptMessage.getReceivedReceipts();
+
+                for (Receipt receipt : receivedReceipts){
+                    if (consistencyMap.containsKey(receipt.checksum)){
+                        try{
+                            returningQueue.put(new ReturningEvent(consistencyMap.get(receipt.checksum), Status.getStatusFromString(receipt.status)));
+                        } catch (InterruptedException interrupt) {
+                            LOG.severe("MessageHandler interrupted!!");
+                        }
+                        consistencyMap.remove(receipt.checksum);
+                    } else {
+                        LOG.severe("Message with checksum " + receipt.checksum + " was not found in the consistency hashmap.");
+                    }
+                }
+                break;
             default:
                 LOG.fine(String.format("Skipping event of type %s", message.getType()));
                 break;
@@ -151,6 +187,22 @@ public class EventBusClient implements MessageHandler, CloseHandler {
         // retry logic is embedded in wsWrapper
         // so, at this point, just give up.
         stop();
+    }
+
+    public String hashSHA1(Event event) {
+        StringBuilder hash = new StringBuilder();
+        try{
+            MessageDigest mDigest = MessageDigest.getInstance("SHA1");
+            byte[] result = mDigest.digest(event.getData().toString().getBytes("UTF-8"));
+
+            for (byte current : result) {
+                hash.append(Integer.toString( (current & 0xff) + 0x100, 16).substring( 1 ));
+            }
+
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            LOG.severe("Hashing failed: " + e.getMessage());
+        }
+        return hash.toString();
     }
 
 }

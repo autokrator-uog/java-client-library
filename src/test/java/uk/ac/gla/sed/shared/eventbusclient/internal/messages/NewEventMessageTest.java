@@ -4,6 +4,7 @@ import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import uk.ac.gla.sed.shared.eventbusclient.api.Consistency;
 import uk.ac.gla.sed.shared.eventbusclient.api.Event;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ class NewEventMessageTest {
     @BeforeEach
     void setUp() {
         eventList = new ArrayList<>();
-        eventList.add(new Event("TestEvent", testEventBody));
+        eventList.add(new Event("TestEvent", testEventBody, new Consistency("test","*")));
     }
 
     @Test

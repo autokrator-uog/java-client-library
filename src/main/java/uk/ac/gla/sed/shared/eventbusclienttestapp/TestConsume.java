@@ -15,6 +15,7 @@ class TestConsume {
             try {
                 Event newEvent = client.getIncomingEventsQueue().poll(30, TimeUnit.SECONDS);
                 if (newEvent == null) {
+                    System.out.println(client.getIncomingEventsQueue().isEmpty());
                     System.out.println("Nothing yet....");
                     continue;
                 }
